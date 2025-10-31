@@ -18,6 +18,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     dispatch(logout());
+    localStorage.removeItem('loggedIn');
     navigate('/login');
   };
 

@@ -4,20 +4,75 @@ import { useSelector } from 'react-redux';
 
 export default function Header({ onLogout }) {
   // Use optional chaining and default to empty array
-  const cartItems = useSelector(state => state.cart?.items || []);
-  const currentUser = useSelector(state => state.user?.currentUser);
+  const cartItems = useSelector((state) => state.cart?.items || []);
+  const currentUser = useSelector((state) => state.user?.currentUser);
 
   return (
-    <header style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#111', color: '#fff' }}>
-      <h1>MyNetflix</h1>
-      <nav>
-        <Link to="/dashboard" style={{ color: '#fff', marginRight: '10px' }}>Home</Link>
-        <Link to="/cart" style={{ color: '#fff', marginRight: '10px' }}>Cart ({cartItems.length})</Link>
-        {currentUser && <>
-          <span style={{ marginRight: '10px' }}>Hi, {currentUser.email}</span>
-          <button onClick={onLogout}>Logout</button>
-        </>}
+    <header style={styles.header}>
+      <div style={styles.left}>
+        <div style={styles.brand}>MiniFlix</div>
+      </div>
+      <nav style={styles.nav}>
+        <Link to="/dashboard" style={styles.navLink}>Home</Link>
+        <Link to="/cart" style={styles.navLink}>Cart ({cartItems.length})</Link>
+        {currentUser && (
+          <>
+            <span style={styles.user}>Hi, {currentUser.email}</span>
+            <button onClick={onLogout} style={styles.logout}>Logout</button>
+          </>
+        )}
       </nav>
     </header>
   );
 }
+
+const styles = {
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 24px',
+    background: '#0f0f0f',
+    color: '#fff',
+    borderBottom: '1px solid #222',
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+  },
+  left: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  brand: {
+    fontSize: '24px',
+    fontWeight: 800,
+    color: '#e50914',
+    letterSpacing: '0.5px',
+  },
+  nav: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  navLink: {
+    color: '#e5e5e5',
+    textDecoration: 'none',
+    padding: '6px 8px',
+    borderRadius: '4px',
+  },
+  user: {
+    color: '#b3b3b3',
+    marginRight: '6px',
+    fontSize: '14px',
+  },
+  logout: {
+    background: '#e50914',
+    border: 'none',
+    color: '#fff',
+    padding: '8px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: 700,
+  },
+};

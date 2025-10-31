@@ -3,30 +3,85 @@ import MovieCard from "../components/MovieCard";
 
 export default function Home() {
   const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(
-      "https://api.themoviedb.org/3/movie/popular?api_key=ec04075b9b1c83a6a3941ed69a9ad957&language=en-US&page=1"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.results) {
-          setMovies(data.results); // TMDb returns 'results' array
+    async function load() {
+      try {
+        setLoading(true);
+        setError("");
+        const apiKey = import.meta.env.VITE_TMDB_API_KEY; // v3 key
+        const readToken = import.meta.env.VITE_TMDB_READ_TOKEN; // v4 read access token
+
+        if (!apiKey && !readToken) {
+          setError(
+            "TMDB credentials missing. Set VITE_TMDB_API_KEY (v3) or VITE_TMDB_READ_TOKEN (v4) in a .env.local file."
+          );
+          setMovies([]);
+          return;
         }
-      })
-      .catch((err) => console.error("Error fetching movies:", err));
+
+        const baseUrl = "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1";
+        const url = apiKey ? `${baseUrl}&api_key=${apiKey}` : baseUrl;
+        const headers = readToken
+          ? { Authorization: `Bearer ${readToken}` }
+          : undefined;
+
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+        if (!res.ok || !data.results) {
+          const msg = data.status_message || "Failed to load movies.";
+          setError(msg);
+          setMovies([]);
+        } else {
+          setMovies(data.results);
+        }
+      } catch (err) {
+        setError("Network error loading movies.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
+  const styles = {
+    section: {
+      padding: '24px',
+      backgroundColor: '#141414',
+      color: '#e5e5e5',
+    },
+    title: {
+      fontSize: '22px',
+      fontWeight: 700,
+      marginBottom: '16px',
+    },
+    gridGutter: {
+      rowGap: '16px',
+    },
+  };
+
+  if (loading) {
+    return (
+      <section style={styles.section}><h2 style={styles.title}>Loading…</h2></section>
+    );
+  }
+
   return (
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">🎬 Movie Store</h2>
-      <div className="row">
-        {movies.map((movie) => (
-          <div className="col-md-3 mb-4" key={movie.id}>
-            <MovieCard movie={movie} />
-          </div>
-        ))}
-      </div>
-    </div>
+    <section style={styles.section}>
+      <h2 style={styles.title}>Trending Now</h2>
+      {error ? (
+        <p style={{ color: '#b3b3b3' }}>{error} Check your TMDB API key or try again later.</p>
+      ) : (
+        <div className="row" style={styles.gridGutter}>
+          {movies.map((movie) => (
+            <div className="col-md-3 mb-4" key={movie.id}>
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

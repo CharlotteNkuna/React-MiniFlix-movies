@@ -12,7 +12,8 @@ import User from './components/User';
 // ✅ PrivateRoute defined inside App.jsx
 function PrivateRoute({ children }) {
   const currentUser = useSelector((state) => state.user?.currentUser);
-  return currentUser ? children : <Navigate to="/login" />;
+  const loggedIn = JSON.parse(localStorage.getItem('loggedIn') || 'false');
+  return currentUser || loggedIn ? children : <Navigate to="/login" />;
 }
 
 export default function App() {
